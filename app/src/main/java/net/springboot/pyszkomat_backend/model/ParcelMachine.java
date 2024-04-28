@@ -9,19 +9,24 @@ import java.util.List;
 public class ParcelMachine {
 
     @Id
-    private String id;
+    public String id;
 
-    private double latitude;
+    public double latitude;
 
-    private double longitude;
+    public double longitude;
 
-    private String address;
+    public String address;
 
     @OneToMany(mappedBy = "parcelMachine", cascade = CascadeType.ALL)
-    private List<Locker> lockers;
+    public List<Locker> lockers;
 
     @ManyToMany
-    private List<Restaurant> restaurants;
+    @JoinTable(
+            name = "parcel_machine_restaurant",
+            joinColumns = @JoinColumn(name = "parcel_machine_id"),
+            inverseJoinColumns = @JoinColumn(name = "restaurant_id")
+    )
+    public List<Restaurant> restaurants;
 
     public ParcelMachine() {
     }
@@ -30,56 +35,15 @@ public class ParcelMachine {
             String id,
             double latitude,
             double longitude,
-            String address
+            String address,
+            List<Locker> lockers,
+            List<Restaurant> restaurants
     ) {
-        super();
         this.id = id;
         this.latitude = latitude;
         this.longitude = longitude;
         this.address = address;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
-    }
-
-    public double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public List<Locker> getLockers() {
-        return lockers;
-    }
-
-    public List<Restaurant> getRestaurants() {
-        return restaurants;
-    }
-
-    public void setRestaurants(List<Restaurant> restaurants) {
+        this.lockers = lockers;
         this.restaurants = restaurants;
     }
 }

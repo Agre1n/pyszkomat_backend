@@ -52,9 +52,10 @@ public class OrderController {
         order.setDeliveryTime(orderDetails.getDeliveryTime());
         order.setPickUpTime(orderDetails.getPickUpTime());
         order.setStatus(orderDetails.getStatus());
-        order.setHeated(orderDetails.getIsHeated());
+        order.setIsHeated(orderDetails.getIsHeated());
         order.setCustomer(orderDetails.getCustomer());
         order.setLocker(orderDetails.getLocker());
+        order.setOrderItems(orderDetails.getOrderItems());
 
         Order updatedOrder = orderRepository.save(order);
         return ResponseEntity.ok(updatedOrder);

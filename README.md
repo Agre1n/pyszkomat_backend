@@ -16,7 +16,7 @@ open CMD in `./app`
 
 `docker-compose up`
 
-## How to run on AWS EC2 instance
+## How to run on AWS EC2 instance (for future deployment)
 
 open CMD in `./aws`
 

@@ -12,29 +12,29 @@ public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    public Long id;
 
-    private LocalDateTime orderTime;
+    public LocalDateTime orderTime;
 
-    private LocalDateTime deliveryTime;
+    public LocalDateTime deliveryTime;
 
-    private LocalDateTime pickUpTime;
+    public LocalDateTime pickUpTime;
 
     @Enumerated(EnumType.STRING)
-    private OrderStatus status;
+    public OrderStatus status;
 
-    private boolean isHeated;
+    public boolean isHeated;
 
     @ManyToOne
     @JoinColumn(name = "customer_id", nullable = false)
-    private Customer customer;
+    public Customer customer;
 
     @ManyToOne
     @JoinColumn(name = "locker_id", nullable = false)
-    private Locker locker;
+    public Locker locker;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    private List<OrderItem> orderItems;
+    public List<OrderItem> orderItems;
 
     public Order() {
     }
@@ -44,81 +44,26 @@ public class Order {
             LocalDateTime deliveryTime,
             LocalDateTime pickUpTime,
             OrderStatus status,
-            boolean isHeated
+            boolean isHeated,
+            Customer customer,
+            Locker locker,
+            List<OrderItem> orderItems
     ) {
-        super();
         this.orderTime = orderTime;
         this.deliveryTime = deliveryTime;
         this.pickUpTime = pickUpTime;
         this.status = status;
         this.isHeated = isHeated;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public LocalDateTime getOrderTime() {
-        return orderTime;
-    }
-
-    public void setOrderTime(LocalDateTime orderTime) {
-        this.orderTime = orderTime;
-    }
-
-    public LocalDateTime getDeliveryTime() {
-        return deliveryTime;
-    }
-
-    public void setDeliveryTime(LocalDateTime deliveryTime) {
-        this.deliveryTime = deliveryTime;
-    }
-
-    public LocalDateTime getPickUpTime() {
-        return pickUpTime;
-    }
-
-    public void setPickUpTime(LocalDateTime pickUpTime) {
-        this.pickUpTime = pickUpTime;
-    }
-
-    public OrderStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(OrderStatus status) {
-        this.status = status;
-    }
-
-    public boolean getIsHeated() {
-        return isHeated;
-    }
-
-    public void setHeated(boolean heated) {
-        isHeated = heated;
-    }
-
-    public Customer getCustomer() {
-        return customer;
-    }
-
-    public void setCustomer(Customer customer) {
         this.customer = customer;
-    }
-
-    public Locker getLocker() {
-        return locker;
-    }
-
-    public void setLocker(Locker locker) {
         this.locker = locker;
+        this.orderItems = orderItems;
     }
 
-    public List<OrderItem> getOrderItems() {
-        return orderItems;
+    public float getTotalPrice() {
+        float totalPrice = 0.0f;
+        for (OrderItem orderItem : orderItems) {
+            totalPrice += orderItem.getTotalPrice();
+        }
+        return totalPrice;
     }
 }

@@ -51,6 +51,7 @@ public class ParcelMachineController {
         parcelMachine.setLatitude(parcelMachineDetails.getLatitude());
         parcelMachine.setLongitude(parcelMachineDetails.getLongitude());
         parcelMachine.setAddress(parcelMachineDetails.getAddress());
+        parcelMachine.setLockers(parcelMachineDetails.getLockers());
         parcelMachine.setRestaurants(parcelMachineDetails.getRestaurants());
 
         ParcelMachine updatedParcelMachine = parcelMachineRepository.save(parcelMachine);

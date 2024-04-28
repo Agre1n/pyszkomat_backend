@@ -55,6 +55,8 @@ public class RestaurantController {
         restaurant.setCategory(restaurantDetails.getCategory());
         restaurant.setRating(restaurantDetails.getRating());
         restaurant.setPhotoUrl(restaurantDetails.getPhotoUrl());
+        restaurant.setMenuItems(restaurantDetails.getMenuItems());
+        restaurant.setParcelMachines(restaurantDetails.getParcelMachines());
 
         Restaurant updatedRestaurant = restaurantRepository.save(restaurant);
         return ResponseEntity.ok(updatedRestaurant);
