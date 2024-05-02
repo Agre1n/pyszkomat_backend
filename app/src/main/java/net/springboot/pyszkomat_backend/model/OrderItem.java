@@ -23,7 +23,8 @@ public class OrderItem {
     public OrderItem() {
     }
 
-    public OrderItem(int quantity, MenuItem menuItem, Order order) {
+    public OrderItem(Long id, int quantity, MenuItem menuItem, Order order) {
+        this.id = id;
         this.quantity = quantity;
 
         this.setMenuItem(menuItem);

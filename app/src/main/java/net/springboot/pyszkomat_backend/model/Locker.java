@@ -19,7 +19,8 @@ public class Locker {
     public Locker() {
     }
 
-    public Locker(boolean isEmpty, ParcelMachine parcelMachine) {
+    public Locker(Long id, boolean isEmpty, ParcelMachine parcelMachine) {
+        this.id = id;
         this.isEmpty = isEmpty;
 
         this.setParcelMachine(parcelMachine);

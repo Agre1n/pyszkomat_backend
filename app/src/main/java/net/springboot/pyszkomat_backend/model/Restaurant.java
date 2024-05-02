@@ -38,6 +38,7 @@ public class Restaurant {
     }
 
     public Restaurant(
+            Long id,
             String name,
             String address,
             String phoneNumber,
@@ -48,6 +49,7 @@ public class Restaurant {
             List<MenuItem> menuItems,
             List<ParcelMachine> parcelMachines
     ) {
+        this.id = id;
         this.name = name;
         this.address = address;
         this.phoneNumber = phoneNumber;

@@ -40,6 +40,7 @@ public class Order {
     }
 
     public Order(
+            Long id,
             LocalDateTime orderTime,
             LocalDateTime deliveryTime,
             LocalDateTime pickUpTime,
@@ -49,6 +50,7 @@ public class Order {
             Locker locker,
             List<OrderItem> orderItems
     ) {
+        this.id = id;
         this.orderTime = orderTime;
         this.deliveryTime = deliveryTime;
         this.pickUpTime = pickUpTime;
