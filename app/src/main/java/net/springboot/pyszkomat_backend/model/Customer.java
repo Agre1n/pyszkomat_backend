@@ -1,6 +1,7 @@
 package net.springboot.pyszkomat_backend.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 
 import java.util.List;
 
@@ -16,6 +17,7 @@ public class Customer {
 
     public String lastName;
 
+    @Email
     public String email;
 
     public String phoneNumber;
@@ -29,6 +31,7 @@ public class Customer {
     }
 
     public Customer(
+            Long id,
             String firstName,
             String lastName,
             String email,
@@ -36,6 +39,7 @@ public class Customer {
             String address,
             List<Order> orders
     ) {
+        this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;

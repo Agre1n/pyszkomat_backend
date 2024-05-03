@@ -1,12 +1,14 @@
 package net.springboot.pyszkomat_backend.controller;
 
-import jakarta.validation.Valid;
-import net.springboot.pyszkomat_backend.exception.ResourceNotFoundException;
+import net.springboot.pyszkomat_backend.dto.crud.ParcelMachineCrudDto;
 import net.springboot.pyszkomat_backend.model.ParcelMachine;
-import net.springboot.pyszkomat_backend.repository.ParcelMachineRepository;
+import net.springboot.pyszkomat_backend.service.LockerService;
+import net.springboot.pyszkomat_backend.service.ParcelMachineService;
+import net.springboot.pyszkomat_backend.service.RestaurantService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,54 +18,64 @@ import java.util.Map;
 @RequestMapping("/api/parcel_machines")
 public class ParcelMachineController {
 
-    private final ParcelMachineRepository parcelMachineRepository;
+    private final LockerService lockerService;
+    private final ParcelMachineService parcelMachineService;
+    private final RestaurantService restaurantService;
 
-    public ParcelMachineController(ParcelMachineRepository parcelMachineRepository) {
-        this.parcelMachineRepository = parcelMachineRepository;
+    public ParcelMachineController(
+            LockerService lockerService,
+            ParcelMachineService parcelMachineService,
+            RestaurantService restaurantService
+    ) {
+        this.lockerService = lockerService;
+        this.parcelMachineService = parcelMachineService;
+        this.restaurantService = restaurantService;
     }
 
     @GetMapping
-    public List<ParcelMachine> getAllParcelMachines() {
-        return parcelMachineRepository.findAll();
+    public ResponseEntity<List<ParcelMachineCrudDto>> getAllParcelMachines() {
+        List<ParcelMachineCrudDto> parcelMachines = new ArrayList<>();
+
+        for (ParcelMachine parcelMachine : parcelMachineService.getParcelMachines()) {
+            parcelMachines.add(new ParcelMachineCrudDto(parcelMachine));
+        }
+
+        return ResponseEntity.ok(parcelMachines);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ParcelMachine> getParcelMachineById(@PathVariable Long id) {
-        ParcelMachine parcelMachine = parcelMachineRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("ParcelMachine with id :" + id + " not found"));
-
-        return ResponseEntity.ok(parcelMachine);
+    public ResponseEntity<ParcelMachineCrudDto> getParcelMachineById(@PathVariable String id) {
+        return ResponseEntity.ok(new ParcelMachineCrudDto(parcelMachineService.getParcelMachine(id)));
     }
 
     @PostMapping
-    public ParcelMachine createParcelMachine(@Valid @RequestBody ParcelMachine parcelMachine) {
-        return parcelMachineRepository.save(parcelMachine);
+    public ResponseEntity<ParcelMachineCrudDto> addParcelMachine(@RequestBody ParcelMachineCrudDto parcelMachineCrudDto) {
+        parcelMachineCrudDto.lockersIds = new ArrayList<>();
+
+        ParcelMachine newParcelMachine = parcelMachineService.addParcelMachine(
+                parcelMachineCrudDto.toParcelMachine(lockerService, restaurantService)
+        );
+
+        return ResponseEntity.ok(new ParcelMachineCrudDto(newParcelMachine));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ParcelMachine> updateParcelMachine(
-            @PathVariable Long id,
-            @Valid @RequestBody ParcelMachine parcelMachineDetails
+    public ResponseEntity<ParcelMachineCrudDto> updateParcelMachine(
+            @PathVariable String id,
+            @RequestBody ParcelMachineCrudDto parcelMachineCrudDto
     ) {
-        ParcelMachine parcelMachine = parcelMachineRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("ParcelMachine with id :" + id + " not found"));
+        parcelMachineCrudDto.lockersIds = new ArrayList<>();
 
-        parcelMachine.setLatitude(parcelMachineDetails.getLatitude());
-        parcelMachine.setLongitude(parcelMachineDetails.getLongitude());
-        parcelMachine.setAddress(parcelMachineDetails.getAddress());
-        parcelMachine.setLockers(parcelMachineDetails.getLockers());
-        parcelMachine.setRestaurants(parcelMachineDetails.getRestaurants());
+        ParcelMachine updatedParcelMachine = parcelMachineService.updateParcelMachine(
+                id, parcelMachineCrudDto.toParcelMachine(lockerService, restaurantService)
+        );
 
-        ParcelMachine updatedParcelMachine = parcelMachineRepository.save(parcelMachine);
-        return ResponseEntity.ok(updatedParcelMachine);
+        return ResponseEntity.ok(new ParcelMachineCrudDto(updatedParcelMachine));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, Boolean>> deleteParcelMachine(@PathVariable Long id) {
-        ParcelMachine parcelMachine = parcelMachineRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("ParcelMachine with id :" + id + " not found"));
-
-        parcelMachineRepository.delete(parcelMachine);
+    public ResponseEntity<Map<String, Boolean>> deleteParcelMachine(@PathVariable String id) {
+        parcelMachineService.deleteParcelMachine(id);
 
         Map<String, Boolean> response = new HashMap<>();
         response.put("deleted", Boolean.TRUE);

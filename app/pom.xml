@@ -12,10 +12,11 @@
     <artifactId>pyszkomat_backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>pyszkomat_backend</name>
-    <description>REST API Backend for Pyszkomat Application</description>
+    <description>Pyszkomat Application REST API Backend</description>
     <properties>
         <java.version>22</java.version>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -42,11 +43,16 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>2.5.0</version>
         </dependency>
     </dependencies>
+
     <build>
         <plugins>
             <plugin>

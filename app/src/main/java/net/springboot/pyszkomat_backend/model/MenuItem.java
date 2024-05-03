@@ -32,6 +32,7 @@ public class MenuItem {
     }
 
     public MenuItem(
+            Long id,
             String name,
             String description,
             MenuItemCategory category,
@@ -39,6 +40,7 @@ public class MenuItem {
             String photoUrl,
             Restaurant restaurant
     ) {
+        this.id = id;
         this.name = name;
         this.description = description;
         this.category = category;

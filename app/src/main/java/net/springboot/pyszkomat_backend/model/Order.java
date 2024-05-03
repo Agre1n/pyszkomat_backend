@@ -40,6 +40,7 @@ public class Order {
     }
 
     public Order(
+            Long id,
             LocalDateTime orderTime,
             LocalDateTime deliveryTime,
             LocalDateTime pickUpTime,
@@ -49,6 +50,7 @@ public class Order {
             Locker locker,
             List<OrderItem> orderItems
     ) {
+        this.id = id;
         this.orderTime = orderTime;
         this.deliveryTime = deliveryTime;
         this.pickUpTime = pickUpTime;
@@ -57,13 +59,5 @@ public class Order {
         this.customer = customer;
         this.locker = locker;
         this.orderItems = orderItems;
-    }
-
-    public float getTotalPrice() {
-        float totalPrice = 0.0f;
-        for (OrderItem orderItem : orderItems) {
-            totalPrice += orderItem.getTotalPrice();
-        }
-        return totalPrice;
     }
 }

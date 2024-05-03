@@ -1,12 +1,13 @@
 package net.springboot.pyszkomat_backend.controller;
 
-import jakarta.validation.Valid;
-import net.springboot.pyszkomat_backend.exception.ResourceNotFoundException;
+import net.springboot.pyszkomat_backend.dto.crud.LockerCrudDto;
 import net.springboot.pyszkomat_backend.model.Locker;
-import net.springboot.pyszkomat_backend.repository.LockerRepository;
+import net.springboot.pyszkomat_backend.service.LockerService;
+import net.springboot.pyszkomat_backend.service.ParcelMachineService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,51 +17,54 @@ import java.util.Map;
 @RequestMapping("/api/lockers")
 public class LockerController {
 
-    private final LockerRepository lockerRepository;
+    private final LockerService lockerService;
+    private final ParcelMachineService parcelMachineService;
 
-    public LockerController(LockerRepository lockerRepository) {
-        this.lockerRepository = lockerRepository;
+    public LockerController(LockerService lockerService, ParcelMachineService parcelMachineService) {
+        this.lockerService = lockerService;
+        this.parcelMachineService = parcelMachineService;
     }
 
     @GetMapping
-    public List<Locker> getAllLockers() {
-        return lockerRepository.findAll();
+    public ResponseEntity<List<LockerCrudDto>> getAllLockers() {
+        List<LockerCrudDto> lockers = new ArrayList<>();
+
+        for (Locker locker : lockerService.getLockers()) {
+            lockers.add(new LockerCrudDto(locker));
+        }
+
+        return ResponseEntity.ok(lockers);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Locker> getLockerById(@PathVariable Long id) {
-        Locker locker = lockerRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Locker with id :" + id + " not found"));
-
-        return ResponseEntity.ok(locker);
+    public ResponseEntity<LockerCrudDto> getLockerById(@PathVariable Long id) {
+        return ResponseEntity.ok(new LockerCrudDto(lockerService.getLocker(id)));
     }
 
     @PostMapping
-    public Locker createLocker(@Valid @RequestBody Locker locker) {
-        return lockerRepository.save(locker);
+    public ResponseEntity<LockerCrudDto> createLocker(@RequestBody LockerCrudDto lockerDTO) {
+        Locker newLocker = lockerService.addLocker(
+                lockerDTO.toLocker(parcelMachineService)
+        );
+
+        return ResponseEntity.ok(new LockerCrudDto(newLocker));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Locker> updateLocker(
+    public ResponseEntity<LockerCrudDto> updateLocker(
             @PathVariable Long id,
-            @Valid @RequestBody Locker lockerDetails
+            @RequestBody LockerCrudDto lockerDTO
     ) {
-        Locker locker = lockerRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Locker with id :" + id + " not found"));
+        Locker updatedLocker = lockerService.updateLocker(
+                id, lockerDTO.toLocker(parcelMachineService)
+        );
 
-        locker.setIsEmpty(lockerDetails.getIsEmpty());
-        locker.setParcelMachine(lockerDetails.getParcelMachine());
-
-        Locker updatedLocker = lockerRepository.save(locker);
-        return ResponseEntity.ok(updatedLocker);
+        return ResponseEntity.ok(new LockerCrudDto(updatedLocker));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, Boolean>> deleteLocker(@PathVariable Long id) {
-        Locker locker = lockerRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Locker with id :" + id + " not found"));
-
-        lockerRepository.delete(locker);
+        lockerService.deleteLocker(id);
 
         Map<String, Boolean> response = new HashMap<>();
         response.put("deleted", Boolean.TRUE);

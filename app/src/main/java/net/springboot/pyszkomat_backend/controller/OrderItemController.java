@@ -1,12 +1,14 @@
 package net.springboot.pyszkomat_backend.controller;
 
-import jakarta.validation.Valid;
-import net.springboot.pyszkomat_backend.exception.ResourceNotFoundException;
+import net.springboot.pyszkomat_backend.dto.crud.OrderItemCrudDto;
 import net.springboot.pyszkomat_backend.model.OrderItem;
-import net.springboot.pyszkomat_backend.repository.OrderItemRepository;
+import net.springboot.pyszkomat_backend.service.MenuItemService;
+import net.springboot.pyszkomat_backend.service.OrderItemService;
+import net.springboot.pyszkomat_backend.service.OrderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,52 +18,59 @@ import java.util.Map;
 @RequestMapping("/api/order_items")
 public class OrderItemController {
 
-    private final OrderItemRepository orderItemRepository;
+    private final MenuItemService menuItemService;
+    private final OrderItemService orderItemService;
+    private final OrderService orderService;
 
-    public OrderItemController(OrderItemRepository orderItemRepository) {
-        this.orderItemRepository = orderItemRepository;
+    public OrderItemController(
+            MenuItemService menuItemService,
+            OrderItemService orderItemService,
+            OrderService orderService
+    ) {
+        this.menuItemService = menuItemService;
+        this.orderItemService = orderItemService;
+        this.orderService = orderService;
     }
 
     @GetMapping
-    public List<OrderItem> getAllOrderItems() {
-        return orderItemRepository.findAll();
+    public ResponseEntity<List<OrderItemCrudDto>> getAllOrderItems() {
+        List<OrderItemCrudDto> orderItems = new ArrayList<>();
+
+        for (OrderItem orderItem : orderItemService.getOrderItems()) {
+            orderItems.add(new OrderItemCrudDto(orderItem));
+        }
+
+        return ResponseEntity.ok(orderItems);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<OrderItem> getOrderItemById(@PathVariable Long id) {
-        OrderItem orderItem = orderItemRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("OrderItem with id :" + id + " not found"));
-
-        return ResponseEntity.ok(orderItem);
+    public ResponseEntity<OrderItemCrudDto> getOrderItemById(@PathVariable Long id) {
+        return ResponseEntity.ok(new OrderItemCrudDto(orderItemService.getOrderItem(id)));
     }
 
     @PostMapping
-    public OrderItem createOrderItem(@Valid @RequestBody OrderItem orderItem) {
-        return orderItemRepository.save(orderItem);
+    public ResponseEntity<OrderItemCrudDto> createOrderItem(@RequestBody OrderItemCrudDto orderItemDTO) {
+        OrderItem newOrderItem = orderItemService.addOrderItem(
+                orderItemDTO.toOrderItem(menuItemService, orderService)
+        );
+
+        return ResponseEntity.ok(new OrderItemCrudDto(newOrderItem));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<OrderItem> updateOrderItem(
+    public ResponseEntity<OrderItemCrudDto> updateOrderItem(
             @PathVariable Long id,
-            @Valid @RequestBody OrderItem orderItemDetails
-    ) {
-        OrderItem orderItem = orderItemRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("OrderItem with id :" + id + " not found"));
+            @RequestBody OrderItemCrudDto orderItemDTO) {
+        OrderItem updatedOrderItem = orderItemService.updateOrderItem(
+                id, orderItemDTO.toOrderItem(menuItemService, orderService)
+        );
 
-        orderItem.setQuantity(orderItemDetails.getQuantity());
-        orderItem.setMenuItem(orderItemDetails.getMenuItem());
-        orderItem.setOrder(orderItemDetails.getOrder());
-
-        OrderItem updatedOrderItem = orderItemRepository.save(orderItem);
-        return ResponseEntity.ok(updatedOrderItem);
+        return ResponseEntity.ok(new OrderItemCrudDto(updatedOrderItem));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, Boolean>> deleteOrderItem(@PathVariable Long id) {
-        OrderItem orderItem = orderItemRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("OrderItem with id :" + id + " not found"));
-
-        orderItemRepository.delete(orderItem);
+        orderItemService.deleteOrderItem(id);
 
         Map<String, Boolean> response = new HashMap<>();
         response.put("deleted", Boolean.TRUE);

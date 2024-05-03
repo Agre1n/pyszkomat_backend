@@ -1,11 +1,9 @@
 package net.springboot.pyszkomat_backend.controller;
 
-import jakarta.validation.Valid;
-import net.springboot.pyszkomat_backend.dto.CustomerDTO;
-import net.springboot.pyszkomat_backend.exception.ResourceNotFoundException;
+import net.springboot.pyszkomat_backend.dto.crud.CustomerCrudDto;
 import net.springboot.pyszkomat_backend.model.Customer;
-import net.springboot.pyszkomat_backend.repository.CustomerRepository;
-import net.springboot.pyszkomat_backend.repository.OrderRepository;
+import net.springboot.pyszkomat_backend.service.CustomerService;
+import net.springboot.pyszkomat_backend.service.OrderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,68 +17,58 @@ import java.util.Map;
 @RequestMapping("/api/customers")
 public class CustomerController {
 
-    private final CustomerRepository customerRepository;
-    private final OrderRepository orderRepository;
+    private final CustomerService customerService;
+    private final OrderService orderService;
 
-    public CustomerController(CustomerRepository customerRepository, OrderRepository orderRepository) {
-        this.customerRepository = customerRepository;
-        this.orderRepository = orderRepository;
+    public CustomerController(CustomerService customerService, OrderService orderService) {
+        this.customerService = customerService;
+        this.orderService = orderService;
     }
 
     @GetMapping
-    public List<CustomerDTO> getAllCustomers() {
-        List<CustomerDTO> customers = new ArrayList<>();
+    public ResponseEntity<List<CustomerCrudDto>> getAllCustomers() {
+        List<CustomerCrudDto> customers = new ArrayList<>();
 
-        for (Customer customer : customerRepository.findAll()) {
-            customers.add(new CustomerDTO(customer));
+        for (Customer customer : customerService.getCustomers()) {
+            customers.add(new CustomerCrudDto(customer));
         }
 
-        return customers;
+        return ResponseEntity.ok(customers);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CustomerDTO> getCustomerById(@PathVariable Long id) {
-        Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Customer with id :" + id + " not found"));
-
-        return ResponseEntity.ok(new CustomerDTO(customer));
+    public ResponseEntity<CustomerCrudDto> getCustomerById(@PathVariable Long id) {
+        return ResponseEntity.ok(new CustomerCrudDto(customerService.getCustomer(id)));
     }
 
     @PostMapping
-    public CustomerDTO createCustomer(@Valid @RequestBody CustomerDTO customerDTO) {
-        customerDTO.setId(null);
-        Customer customer = customerDTO.toCustomer(this.orderRepository);
+    public ResponseEntity<CustomerCrudDto> createCustomer(@RequestBody CustomerCrudDto customerDTO) {
+        customerDTO.ordersIds = new ArrayList<>();
 
-        return new CustomerDTO(customerRepository.save(customer));
+        Customer newCustomer = customerService.addCustomer(
+                customerDTO.toCustomer(orderService)
+        );
+
+        return ResponseEntity.ok(new CustomerCrudDto(newCustomer));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CustomerDTO> updateCustomer(
+    public ResponseEntity<CustomerCrudDto> updateCustomer(
             @PathVariable Long id,
-            @Valid @RequestBody CustomerDTO customerDTO
+            @RequestBody CustomerCrudDto customerDTO
     ) {
-        Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Customer with id :" + id + " not found"));
+        customerDTO.ordersIds = new ArrayList<>();
 
-        Customer customerDetails = customerDTO.toCustomer(this.orderRepository);
+        Customer updatedCustomer = customerService.updateCustomer(
+                id, customerDTO.toCustomer(orderService)
+        );
 
-        customer.setFirstName(customerDetails.getFirstName());
-        customer.setLastName(customerDetails.getLastName());
-        customer.setEmail(customerDetails.getEmail());
-        customer.setPhoneNumber(customerDetails.getPhoneNumber());
-        customer.setAddress(customerDetails.getAddress());
-        customer.setOrders(customerDetails.getOrders());
-
-        Customer updatedCustomer = customerRepository.save(customer);
-        return ResponseEntity.ok(new CustomerDTO(updatedCustomer));
+        return ResponseEntity.ok(new CustomerCrudDto(updatedCustomer));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, Boolean>> deleteCustomer(@PathVariable Long id) {
-        Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Customer with id :" + id + " not found"));
-
-        customerRepository.delete(customer);
+        customerService.deleteCustomer(id);
 
         Map<String, Boolean> response = new HashMap<>();
         response.put("deleted", Boolean.TRUE);

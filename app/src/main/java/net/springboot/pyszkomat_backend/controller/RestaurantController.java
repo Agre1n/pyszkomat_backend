@@ -1,12 +1,14 @@
 package net.springboot.pyszkomat_backend.controller;
 
-import jakarta.validation.Valid;
-import net.springboot.pyszkomat_backend.exception.ResourceNotFoundException;
+import net.springboot.pyszkomat_backend.dto.crud.RestaurantCrudDto;
 import net.springboot.pyszkomat_backend.model.Restaurant;
-import net.springboot.pyszkomat_backend.repository.RestaurantRepository;
+import net.springboot.pyszkomat_backend.service.MenuItemService;
+import net.springboot.pyszkomat_backend.service.ParcelMachineService;
+import net.springboot.pyszkomat_backend.service.RestaurantService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,58 +18,63 @@ import java.util.Map;
 @RequestMapping("/api/restaurants")
 public class RestaurantController {
 
-    private final RestaurantRepository restaurantRepository;
+    private final MenuItemService menuItemService;
+    private final RestaurantService restaurantService;
+    private final ParcelMachineService parcelMachineService;
 
-    public RestaurantController(RestaurantRepository restaurantRepository) {
-        this.restaurantRepository = restaurantRepository;
+    public RestaurantController(
+            MenuItemService menuItemService,
+            RestaurantService restaurantService,
+            ParcelMachineService parcelMachineService
+    ) {
+        this.menuItemService = menuItemService;
+        this.restaurantService = restaurantService;
+        this.parcelMachineService = parcelMachineService;
     }
 
     @GetMapping
-    public List<Restaurant> getAllRestaurants() {
-        return restaurantRepository.findAll();
+    public ResponseEntity<List<RestaurantCrudDto>> getAllRestaurants() {
+        List<RestaurantCrudDto> restaurants = new ArrayList<>();
+
+        for (Restaurant restaurant : restaurantService.getRestaurants()) {
+            restaurants.add(new RestaurantCrudDto(restaurant));
+        }
+
+        return ResponseEntity.ok(restaurants);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Restaurant> getRestaurantById(@PathVariable Long id) {
-        Restaurant restaurant = restaurantRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Restaurant with id :" + id + " not found"));
-
-        return ResponseEntity.ok(restaurant);
+    public ResponseEntity<RestaurantCrudDto> getRestaurantById(@PathVariable Long id) {
+        return ResponseEntity.ok(new RestaurantCrudDto(restaurantService.getRestaurant(id)));
     }
 
     @PostMapping
-    public Restaurant createRestaurant(@Valid @RequestBody Restaurant restaurant) {
-        return restaurantRepository.save(restaurant);
+    public ResponseEntity<RestaurantCrudDto> addRestaurant(@RequestBody RestaurantCrudDto restaurantCrudDto) {
+        restaurantCrudDto.menuItemsIds = new ArrayList<>();
+        restaurantCrudDto.parcelMachinesIds = new ArrayList<>();
+
+        Restaurant newRestaurant = restaurantService.addRestaurant(
+                restaurantCrudDto.toRestaurant(menuItemService, parcelMachineService)
+        );
+
+        return ResponseEntity.ok(new RestaurantCrudDto(newRestaurant));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Restaurant> updateRestaurant(
-            @PathVariable Long id,
-            @Valid @RequestBody Restaurant restaurantDetails
-    ) {
-        Restaurant restaurant = restaurantRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Restaurant with id :" + id + " not found"));
+    public ResponseEntity<RestaurantCrudDto> updateRestaurant(@PathVariable Long id, @RequestBody RestaurantCrudDto restaurantCrudDto) {
+        restaurantCrudDto.menuItemsIds = new ArrayList<>();
+        restaurantCrudDto.parcelMachinesIds = new ArrayList<>();
 
-        restaurant.setName(restaurantDetails.getName());
-        restaurant.setAddress(restaurantDetails.getAddress());
-        restaurant.setPhoneNumber(restaurantDetails.getPhoneNumber());
-        restaurant.setDescription(restaurantDetails.getDescription());
-        restaurant.setCategory(restaurantDetails.getCategory());
-        restaurant.setRating(restaurantDetails.getRating());
-        restaurant.setPhotoUrl(restaurantDetails.getPhotoUrl());
-        restaurant.setMenuItems(restaurantDetails.getMenuItems());
-        restaurant.setParcelMachines(restaurantDetails.getParcelMachines());
+        Restaurant updatedRestaurant = restaurantService.updateRestaurant(
+                id, restaurantCrudDto.toRestaurant(menuItemService, parcelMachineService)
+        );
 
-        Restaurant updatedRestaurant = restaurantRepository.save(restaurant);
-        return ResponseEntity.ok(updatedRestaurant);
+        return ResponseEntity.ok(new RestaurantCrudDto(updatedRestaurant));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, Boolean>> deleteRestaurant(@PathVariable Long id) {
-        Restaurant restaurant = restaurantRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Restaurant with id :" + id + " not found"));
-
-        restaurantRepository.delete(restaurant);
+        restaurantService.deleteRestaurant(id);
 
         Map<String, Boolean> response = new HashMap<>();
         response.put("deleted", Boolean.TRUE);

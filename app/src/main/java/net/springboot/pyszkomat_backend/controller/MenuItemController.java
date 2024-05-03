@@ -1,12 +1,13 @@
 package net.springboot.pyszkomat_backend.controller;
 
-import jakarta.validation.Valid;
-import net.springboot.pyszkomat_backend.exception.ResourceNotFoundException;
+import net.springboot.pyszkomat_backend.dto.crud.MenuItemCrudDto;
 import net.springboot.pyszkomat_backend.model.MenuItem;
-import net.springboot.pyszkomat_backend.repository.MenuItemRepository;
+import net.springboot.pyszkomat_backend.service.MenuItemService;
+import net.springboot.pyszkomat_backend.service.RestaurantService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,55 +17,54 @@ import java.util.Map;
 @RequestMapping("/api/menu_items")
 public class MenuItemController {
 
-    private final MenuItemRepository menuItemRepository;
+    private final MenuItemService menuItemService;
+    private final RestaurantService restaurantService;
 
-    public MenuItemController(MenuItemRepository menuItemRepository) {
-        this.menuItemRepository = menuItemRepository;
+    public MenuItemController(MenuItemService menuItemService, RestaurantService restaurantService) {
+        this.menuItemService = menuItemService;
+        this.restaurantService = restaurantService;
     }
 
     @GetMapping
-    public List<MenuItem> getAllMenuItems() {
-        return menuItemRepository.findAll();
+    public ResponseEntity<List<MenuItemCrudDto>> getAllMenuItems() {
+        List<MenuItemCrudDto> menuItems = new ArrayList<>();
+
+        for (MenuItem menuItem : menuItemService.getMenuItems()) {
+            menuItems.add(new MenuItemCrudDto(menuItem));
+        }
+
+        return ResponseEntity.ok(menuItems);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<MenuItem> getMenuItemById(@PathVariable Long id) {
-        MenuItem menuItem = menuItemRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("MenuItem with id :" + id + " not found"));
-
-        return ResponseEntity.ok(menuItem);
+    public ResponseEntity<MenuItemCrudDto> getMenuItemById(@PathVariable Long id) {
+        return ResponseEntity.ok(new MenuItemCrudDto(menuItemService.getMenuItem(id)));
     }
 
     @PostMapping
-    public MenuItem createMenuItem(@Valid @RequestBody MenuItem menuItem) {
-        return menuItemRepository.save(menuItem);
+    public ResponseEntity<MenuItemCrudDto> createMenuItem(@RequestBody MenuItemCrudDto menuItemDTO) {
+        MenuItem newMenuItem = menuItemService.addMenuItem(
+                menuItemDTO.toMenuItem(restaurantService)
+        );
+
+        return ResponseEntity.ok(new MenuItemCrudDto(newMenuItem));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MenuItem> updateMenuItem(
+    public ResponseEntity<MenuItemCrudDto> updateMenuItem(
             @PathVariable Long id,
-            @Valid @RequestBody MenuItem menuItemDetails
+            @RequestBody MenuItemCrudDto menuItemDTO
     ) {
-        MenuItem menuItem = menuItemRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("MenuItem with id :" + id + " not found"));
+        MenuItem updatedMenuItem = menuItemService.updateMenuItem(
+                id, menuItemDTO.toMenuItem(restaurantService)
+        );
 
-        menuItem.setName(menuItemDetails.getName());
-        menuItem.setDescription(menuItemDetails.getDescription());
-        menuItem.setCategory(menuItemDetails.getCategory());
-        menuItem.setPrice(menuItemDetails.getPrice());
-        menuItem.setPhotoUrl(menuItemDetails.getPhotoUrl());
-        menuItem.setRestaurant(menuItemDetails.getRestaurant());
-
-        MenuItem updatedMenuItem = menuItemRepository.save(menuItem);
-        return ResponseEntity.ok(updatedMenuItem);
+        return ResponseEntity.ok(new MenuItemCrudDto(updatedMenuItem));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, Boolean>> deleteMenuItem(@PathVariable Long id) {
-        MenuItem menuItem = menuItemRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("MenuItem with id :" + id + " not found"));
-
-        menuItemRepository.delete(menuItem);
+        menuItemService.deleteMenuItem(id);
 
         Map<String, Boolean> response = new HashMap<>();
         response.put("deleted", Boolean.TRUE);

@@ -1,51 +1,49 @@
-# pyszkomat_backend
+# Pyszkomat Application REST API Backend
 
 SwaggerUI: http://localhost:8080/api-docs/swagger-ui/index.html
 
 ## How to build and push Docker image
 
-open CMD in `./app`
-
-`docker build --platform=linux/amd64 -t michal1112/pyszkomat_backend .`
+`docker build -t michal1112/pyszkomat_backend .`
 
 `docker push michal1112/pyszkomat_backend`
 
-## How to run locally
-
-open CMD in `./app`
+## How to run Docker container
 
 `docker-compose up`
 
 ## How to run on AWS EC2 instance (for future deployment)
 
-open CMD in `./aws`
+### Connect to EC2 instance
 
-`ssh -i "pyszkomat_app_ssh_key.pem" ec2-user@ec2-35-171-150-192.compute-1.amazonaws.com`
+`ssh -i "pyszkomat-rsa-key.pem" ec2-user@{ instance-public-ip }`
 
 ### Install Docker
 
-`sudo yum install -y yum-utils device-mapper-persistent-data lvm2`
+`sudo yum update -y`
 
-`sudo yum install docker`
+`sudo yum install docker -y`
 
-`sudo service docker start`
+`sudo systemctl start docker`
 
-`sudo usermod -aG docker $USER`
+`sudo systemctl enable docker`
+
+`sudo usermod -a -G docker $(whoami)`
+
+`newgrp docker`
 
 `docker --version`
 
 ### Install Docker Compose
 
-`sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose`
+`sudo curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose`
 
 `sudo chmod +x /usr/local/bin/docker-compose`
 
 `docker-compose --version`
 
-### Create and run compose.yml file
+### Create and run Application
 
-reconnect to the instance
-
-`nano compose.yml`
+`nano docker-compose.yaml`
 
 `docker-compose up`
