@@ -4,7 +4,9 @@ import jakarta.validation.Valid;
 import net.springboot.pyszkomat_backend.exception.ResourceNotFoundException;
 import net.springboot.pyszkomat_backend.model.ParcelMachine;
 import net.springboot.pyszkomat_backend.repository.ParcelMachineRepository;
+import org.springframework.stereotype.Service;
 
+@Service
 public class ParcelMachineService {
 
     private final ParcelMachineRepository parcelMachineRepository;
@@ -27,13 +29,19 @@ public class ParcelMachineService {
     }
 
     public ParcelMachine updateParcelMachine(String id, @Valid ParcelMachine parcelMachine) {
-        ParcelMachine _ = this.getParcelMachine(id);
+        ParcelMachine _ = getParcelMachine(id);
 
         parcelMachine.id = id;
         return parcelMachineRepository.save(parcelMachine);
     }
 
     public void deleteParcelMachine(String id) {
+        ParcelMachine _ = getParcelMachine(id);
+
         parcelMachineRepository.deleteById(id);
+    }
+
+    public boolean isEmpty() {
+        return parcelMachineRepository.count() == 0;
     }
 }

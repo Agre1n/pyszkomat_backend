@@ -23,19 +23,22 @@ public class OrderCrudDto {
     public Long lockerId;
     public List<Long> orderItemsIds;
 
-    public OrderCrudDto(Order order) {
-        this.id = order.id;
-        this.orderTime = order.orderTime;
-        this.deliveryTime = order.deliveryTime;
-        this.pickUpTime = order.pickUpTime;
-        this.status = order.status;
-        this.isHeated = order.isHeated;
-        this.customerId = order.customer.id;
-        this.lockerId = order.locker.id;
+    public OrderCrudDto() {
+    }
 
-        this.orderItemsIds = new ArrayList<>();
+    public OrderCrudDto(Order order) {
+        id = order.id;
+        orderTime = order.orderTime;
+        deliveryTime = order.deliveryTime;
+        pickUpTime = order.pickUpTime;
+        status = order.status;
+        isHeated = order.isHeated;
+        customerId = order.customer.id;
+        lockerId = order.locker.id;
+
+        orderItemsIds = new ArrayList<>();
         for (OrderItem orderItem : order.orderItems) {
-            this.orderItemsIds.add(orderItem.id);
+            orderItemsIds.add(orderItem.id);
         }
     }
 
@@ -45,7 +48,7 @@ public class OrderCrudDto {
             OrderItemService orderItemService
     ) {
         List<OrderItem> orderItems = new ArrayList<>();
-        for (Long orderItemId : this.orderItemsIds) {
+        for (Long orderItemId : orderItemsIds) {
             orderItems.add(orderItemService.getOrderItem(orderItemId));
         }
 

@@ -4,7 +4,9 @@ import jakarta.validation.Valid;
 import net.springboot.pyszkomat_backend.exception.ResourceNotFoundException;
 import net.springboot.pyszkomat_backend.model.Customer;
 import net.springboot.pyszkomat_backend.repository.CustomerRepository;
+import org.springframework.stereotype.Service;
 
+@Service
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
@@ -28,13 +30,19 @@ public class CustomerService {
     }
 
     public Customer updateCustomer(Long id, @Valid Customer customer) {
-        Customer _ = this.getCustomer(id);
+        Customer _ = getCustomer(id);
 
         customer.id = id;
         return customerRepository.save(customer);
     }
 
     public void deleteCustomer(Long id) {
+        Customer _ = getCustomer(id);
+
         customerRepository.deleteById(id);
+    }
+
+    public boolean isEmpty() {
+        return customerRepository.count() == 0;
     }
 }

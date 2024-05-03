@@ -4,7 +4,9 @@ import jakarta.validation.Valid;
 import net.springboot.pyszkomat_backend.exception.ResourceNotFoundException;
 import net.springboot.pyszkomat_backend.model.Restaurant;
 import net.springboot.pyszkomat_backend.repository.RestaurantRepository;
+import org.springframework.stereotype.Service;
 
+@Service
 public class RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
@@ -15,7 +17,7 @@ public class RestaurantService {
 
     public Restaurant getRestaurant(Long id) {
         return restaurantRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("ParcelMachine with id : " + id + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant with id : " + id + " not found"));
     }
 
     public Iterable<Restaurant> getRestaurants() {
@@ -28,13 +30,19 @@ public class RestaurantService {
     }
 
     public Restaurant updateRestaurant(Long id, @Valid Restaurant restaurant) {
-        Restaurant _ = this.getRestaurant(id);
+        Restaurant _ = getRestaurant(id);
 
         restaurant.id = id;
         return restaurantRepository.save(restaurant);
     }
 
     public void deleteRestaurant(Long id) {
+        Restaurant _ = getRestaurant(id);
+
         restaurantRepository.deleteById(id);
+    }
+
+    public boolean isEmpty() {
+        return restaurantRepository.count() == 0;
     }
 }

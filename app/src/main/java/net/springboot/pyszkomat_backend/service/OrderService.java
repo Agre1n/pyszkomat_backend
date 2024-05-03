@@ -4,7 +4,9 @@ import jakarta.validation.Valid;
 import net.springboot.pyszkomat_backend.exception.ResourceNotFoundException;
 import net.springboot.pyszkomat_backend.model.Order;
 import net.springboot.pyszkomat_backend.repository.OrderRepository;
+import org.springframework.stereotype.Service;
 
+@Service
 public class OrderService {
 
     private final OrderRepository orderRepository;
@@ -28,13 +30,19 @@ public class OrderService {
     }
 
     public Order updateOrder(Long id, @Valid Order order) {
-        Order _ = this.getOrder(id);
+        Order _ = getOrder(id);
 
         order.id = id;
         return orderRepository.save(order);
     }
 
     public void deleteOrder(Long id) {
+        Order _ = getOrder(id);
+
         orderRepository.deleteById(id);
+    }
+
+    public boolean isEmpty() {
+        return orderRepository.count() == 0;
     }
 }

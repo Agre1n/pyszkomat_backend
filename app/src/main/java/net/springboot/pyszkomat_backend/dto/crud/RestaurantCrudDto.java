@@ -23,47 +23,50 @@ public class RestaurantCrudDto {
     public List<Long> menuItemsIds;
     public List<String> parcelMachinesIds;
 
-    public RestaurantCrudDto(Restaurant restaurant) {
-        this.id = restaurant.id;
-        this.name = restaurant.name;
-        this.address = restaurant.address;
-        this.phoneNumber = restaurant.phoneNumber;
-        this.description = restaurant.description;
-        this.category = restaurant.category;
-        this.rating = restaurant.rating;
-        this.photoUrl = restaurant.photoUrl;
+    public RestaurantCrudDto() {
+    }
 
-        this.menuItemsIds = new ArrayList<>();
+    public RestaurantCrudDto(Restaurant restaurant) {
+        id = restaurant.id;
+        name = restaurant.name;
+        address = restaurant.address;
+        phoneNumber = restaurant.phoneNumber;
+        description = restaurant.description;
+        category = restaurant.category;
+        rating = restaurant.rating;
+        photoUrl = restaurant.photoUrl;
+
+        menuItemsIds = new ArrayList<>();
         for (MenuItem menuItem : restaurant.menuItems) {
-            this.menuItemsIds.add(menuItem.id);
+            menuItemsIds.add(menuItem.id);
         }
 
-        this.parcelMachinesIds = new ArrayList<>();
+        parcelMachinesIds = new ArrayList<>();
         for (ParcelMachine parcelMachine : restaurant.parcelMachines) {
-            this.parcelMachinesIds.add(parcelMachine.id);
+            parcelMachinesIds.add(parcelMachine.id);
         }
     }
 
     public Restaurant toRestaurant(MenuItemService menuItemService, ParcelMachineService parcelMachineService) {
         List<MenuItem> menuItems = new ArrayList<>();
-        for (Long menuItemId : this.menuItemsIds) {
+        for (Long menuItemId : menuItemsIds) {
             menuItems.add(menuItemService.getMenuItem(menuItemId));
         }
 
         List<ParcelMachine> parcelMachines = new ArrayList<>();
-        for (String parcelMachineId : this.parcelMachinesIds) {
+        for (String parcelMachineId : parcelMachinesIds) {
             parcelMachines.add(parcelMachineService.getParcelMachine(parcelMachineId));
         }
 
         return new Restaurant(
-                this.id,
-                this.name,
-                this.address,
-                this.phoneNumber,
-                this.description,
-                this.category,
-                this.rating,
-                this.photoUrl,
+                id,
+                name,
+                address,
+                phoneNumber,
+                description,
+                category,
+                rating,
+                photoUrl,
                 menuItems,
                 parcelMachines
         );

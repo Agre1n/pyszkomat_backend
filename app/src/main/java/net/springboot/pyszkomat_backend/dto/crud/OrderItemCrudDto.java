@@ -11,19 +11,22 @@ public class OrderItemCrudDto {
     public Long menuItemId;
     public Long orderId;
 
+    public OrderItemCrudDto() {
+    }
+
     public OrderItemCrudDto(OrderItem orderItem) {
-        this.id = orderItem.id;
-        this.quantity = orderItem.quantity;
-        this.menuItemId = orderItem.menuItem.id;
-        this.orderId = orderItem.order.id;
+        id = orderItem.id;
+        quantity = orderItem.quantity;
+        menuItemId = orderItem.menuItem.id;
+        orderId = orderItem.order.id;
     }
 
     public OrderItem toOrderItem(MenuItemService menuItemService, OrderService orderService) {
         return new OrderItem(
-                this.id,
-                this.quantity,
-                menuItemService.getMenuItem(this.menuItemId),
-                orderService.getOrder(this.orderId)
+                id,
+                quantity,
+                menuItemService.getMenuItem(menuItemId),
+                orderService.getOrder(orderId)
         );
     }
 }

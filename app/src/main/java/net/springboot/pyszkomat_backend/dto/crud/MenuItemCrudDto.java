@@ -14,25 +14,28 @@ public class MenuItemCrudDto {
     public String photoUrl;
     public Long restaurantId;
 
+    public MenuItemCrudDto() {
+    }
+
     public MenuItemCrudDto(MenuItem menuItem) {
-        this.id = menuItem.id;
-        this.name = menuItem.name;
-        this.description = menuItem.description;
-        this.category = menuItem.category;
-        this.price = menuItem.price;
-        this.photoUrl = menuItem.photoUrl;
-        this.restaurantId = menuItem.restaurant.id;
+        id = menuItem.id;
+        name = menuItem.name;
+        description = menuItem.description;
+        category = menuItem.category;
+        price = menuItem.price;
+        photoUrl = menuItem.photoUrl;
+        restaurantId = menuItem.restaurant.id;
     }
 
     public MenuItem toMenuItem(RestaurantService restaurantService) {
         return new MenuItem(
-                this.id,
-                this.name,
-                this.description,
-                this.category,
-                this.price,
-                this.photoUrl,
-                restaurantService.getRestaurant(this.restaurantId)
+                id,
+                name,
+                description,
+                category,
+                price,
+                photoUrl,
+                restaurantService.getRestaurant(restaurantId)
         );
     }
 }

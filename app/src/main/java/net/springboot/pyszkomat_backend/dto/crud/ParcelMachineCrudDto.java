@@ -18,39 +18,42 @@ public class ParcelMachineCrudDto {
     public List<Long> lockersIds;
     public List<Long> restaurantsIds;
 
-    public ParcelMachineCrudDto(ParcelMachine parcelMachine) {
-        this.id = parcelMachine.id;
-        this.latitude = parcelMachine.latitude;
-        this.longitude = parcelMachine.longitude;
-        this.address = parcelMachine.address;
+    public ParcelMachineCrudDto() {
+    }
 
-        this.lockersIds = new ArrayList<>();
+    public ParcelMachineCrudDto(ParcelMachine parcelMachine) {
+        id = parcelMachine.id;
+        latitude = parcelMachine.latitude;
+        longitude = parcelMachine.longitude;
+        address = parcelMachine.address;
+
+        lockersIds = new ArrayList<>();
         for (Locker locker : parcelMachine.lockers) {
-            this.lockersIds.add(locker.id);
+            lockersIds.add(locker.id);
         }
 
-        this.restaurantsIds = new ArrayList<>();
+        restaurantsIds = new ArrayList<>();
         for (Restaurant restaurant : parcelMachine.restaurants) {
-            this.restaurantsIds.add(restaurant.id);
+            restaurantsIds.add(restaurant.id);
         }
     }
 
     public ParcelMachine toParcelMachine(LockerService lockerService, RestaurantService restaurantService) {
         List<Locker> lockers = new ArrayList<>();
-        for (Long lockerId : this.lockersIds) {
+        for (Long lockerId : lockersIds) {
             lockers.add(lockerService.getLocker(lockerId));
         }
 
         List<Restaurant> restaurants = new ArrayList<>();
-        for (Long restaurantId : this.restaurantsIds) {
+        for (Long restaurantId : restaurantsIds) {
             restaurants.add(restaurantService.getRestaurant(restaurantId));
         }
 
         return new ParcelMachine(
-                this.id,
-                this.latitude,
-                this.longitude,
-                this.address,
+                id,
+                latitude,
+                longitude,
+                address,
                 lockers,
                 restaurants
         );

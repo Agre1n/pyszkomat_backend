@@ -4,7 +4,9 @@ import jakarta.validation.Valid;
 import net.springboot.pyszkomat_backend.exception.ResourceNotFoundException;
 import net.springboot.pyszkomat_backend.model.Locker;
 import net.springboot.pyszkomat_backend.repository.LockerRepository;
+import org.springframework.stereotype.Service;
 
+@Service
 public class LockerService {
 
     private final LockerRepository lockerRepository;
@@ -28,13 +30,19 @@ public class LockerService {
     }
 
     public Locker updateLocker(Long id, @Valid Locker locker) {
-        Locker _ = this.getLocker(id);
+        Locker _ = getLocker(id);
 
         locker.id = id;
         return lockerRepository.save(locker);
     }
 
     public void deleteLocker(Long id) {
+        Locker _ = getLocker(id);
+
         lockerRepository.deleteById(id);
+    }
+
+    public boolean isEmpty() {
+        return lockerRepository.count() == 0;
     }
 }

@@ -17,33 +17,36 @@ public class CustomerCrudDto {
     public String address;
     public List<Long> ordersIds;
 
-    public CustomerCrudDto(Customer customer) {
-        this.id = customer.id;
-        this.firstName = customer.firstName;
-        this.lastName = customer.lastName;
-        this.email = customer.email;
-        this.phoneNumber = customer.phoneNumber;
-        this.address = customer.address;
+    public CustomerCrudDto() {
+    }
 
-        this.ordersIds = new ArrayList<>();
+    public CustomerCrudDto(Customer customer) {
+        id = customer.id;
+        firstName = customer.firstName;
+        lastName = customer.lastName;
+        email = customer.email;
+        phoneNumber = customer.phoneNumber;
+        address = customer.address;
+
+        ordersIds = new ArrayList<>();
         for (Order order : customer.orders) {
-            this.ordersIds.add(order.id);
+            ordersIds.add(order.id);
         }
     }
 
     public Customer toCustomer(OrderService orderService) {
         List<Order> orders = new ArrayList<>();
-        for (Long id : this.ordersIds) {
+        for (Long id : ordersIds) {
             orders.add(orderService.getOrder(id));
         }
 
         return new Customer(
-                this.id,
-                this.firstName,
-                this.lastName,
-                this.email,
-                this.phoneNumber,
-                this.address,
+                id,
+                firstName,
+                lastName,
+                email,
+                phoneNumber,
+                address,
                 orders
         );
     }
