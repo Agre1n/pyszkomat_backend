@@ -30,7 +30,7 @@ public class Order {
     public Customer customer;
 
     @ManyToOne
-    @JoinColumn(name = "locker_id", nullable = true)
+    @JoinColumn(name = "locker_id", nullable = false)
     public Locker locker;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
