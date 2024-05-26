@@ -10,6 +10,7 @@ public class OrderFrontendDto {
     public Long orderId;
     public LocalDateTime time;
     public OrderStatus status;
+    public String restaurantName;
     public String parcelMachineId;
 
     public OrderFrontendDto() {
@@ -31,6 +32,7 @@ public class OrderFrontendDto {
         }
 
         status = order.status;
+        restaurantName = order.orderItems.getFirst().menuItem.restaurant.name;
         parcelMachineId = order.locker.parcelMachine.id;
     }
 }
