@@ -8,6 +8,7 @@ public enum MenuItemCategory {
     GLUTEN_FREE,
     LUNCH,
     SNACK,
+    SOUP,
     VEGAN,
     VEGETARIAN
 }

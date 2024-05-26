@@ -8,5 +8,6 @@ public enum RestaurantCategory {
     ITALIAN,
     KEBAB,
     MEXICAN,
-    SEAFOOD
+    SEAFOOD,
+    VEGAN
 }
