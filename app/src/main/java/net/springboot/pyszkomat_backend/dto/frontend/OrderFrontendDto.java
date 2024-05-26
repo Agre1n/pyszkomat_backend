@@ -1,14 +1,36 @@
 package net.springboot.pyszkomat_backend.dto.frontend;
 
-import net.springboot.pyszkomat_backend.dto.crud.OrderCrudDto;
-import net.springboot.pyszkomat_backend.dto.crud.OrderItemCrudDto;
+import net.springboot.pyszkomat_backend.enumeration.OrderStatus;
+import net.springboot.pyszkomat_backend.model.Order;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 public class OrderFrontendDto {
-    public OrderCrudDto order;
-    public List<OrderItemCrudDto> orderItems;
+
+    public Long orderId;
+    public LocalDateTime time;
+    public OrderStatus status;
+    public String parcelMachineId;
 
     public OrderFrontendDto() {
+    }
+
+    public OrderFrontendDto(Order order) {
+        orderId = order.id;
+
+        switch (order.status) {
+            case OrderStatus.PREPARED, OrderStatus.DELIVERED:
+                time = order.deliveryTime;
+                break;
+            case OrderStatus.READY_FOR_PICKUP:
+                time = order.pickUpTime;
+                break;
+            default:
+                time = order.orderTime;
+                break;
+        }
+
+        status = order.status;
+        parcelMachineId = order.locker.parcelMachine.id;
     }
 }
