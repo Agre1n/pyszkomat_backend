@@ -27,6 +27,12 @@ public class Customer {
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
     public List<Order> orders;
 
+    @ManyToMany
+    public List<Restaurant> favoriteRestaurants;
+
+    @ManyToMany
+    public List<ParcelMachine> favoriteParcelMachines;
+
     public Customer() {
     }
 
@@ -37,7 +43,9 @@ public class Customer {
             String email,
             String phoneNumber,
             String address,
-            List<Order> orders
+            List<Order> orders,
+            List<Restaurant> favoriteRestaurants,
+            List<ParcelMachine> favoriteParcelMachines
     ) {
         this.id = id;
         this.firstName = firstName;
@@ -46,5 +54,7 @@ public class Customer {
         this.phoneNumber = phoneNumber;
         this.address = address;
         this.orders = orders;
+        this.favoriteRestaurants = favoriteRestaurants;
+        this.favoriteParcelMachines = favoriteParcelMachines;
     }
 }

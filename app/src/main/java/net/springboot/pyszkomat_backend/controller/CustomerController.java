@@ -4,6 +4,8 @@ import net.springboot.pyszkomat_backend.dto.crud.CustomerCrudDto;
 import net.springboot.pyszkomat_backend.model.Customer;
 import net.springboot.pyszkomat_backend.service.CustomerService;
 import net.springboot.pyszkomat_backend.service.OrderService;
+import net.springboot.pyszkomat_backend.service.ParcelMachineService;
+import net.springboot.pyszkomat_backend.service.RestaurantService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,17 +14,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/customers")
 public class CustomerController {
 
     private final CustomerService customerService;
     private final OrderService orderService;
+    private final RestaurantService restaurantService;
+    private final ParcelMachineService parcelMachineService;
 
-    public CustomerController(CustomerService customerService, OrderService orderService) {
+    public CustomerController(CustomerService customerService, OrderService orderService, RestaurantService restaurantService, ParcelMachineService parcelMachineService) {
         this.customerService = customerService;
         this.orderService = orderService;
+        this.restaurantService = restaurantService;
+        this.parcelMachineService = parcelMachineService;
     }
 
     @GetMapping
@@ -46,7 +52,7 @@ public class CustomerController {
         customerDTO.ordersIds = new ArrayList<>();
 
         Customer newCustomer = customerService.addCustomer(
-                customerDTO.toCustomer(orderService)
+                customerDTO.toCustomer(orderService, restaurantService, parcelMachineService)
         );
 
         return ResponseEntity.ok(new CustomerCrudDto(newCustomer));
@@ -60,7 +66,7 @@ public class CustomerController {
         customerDTO.ordersIds = new ArrayList<>();
 
         Customer updatedCustomer = customerService.updateCustomer(
-                id, customerDTO.toCustomer(orderService)
+                id, customerDTO.toCustomer(orderService, restaurantService, parcelMachineService)
         );
 
         return ResponseEntity.ok(new CustomerCrudDto(updatedCustomer));

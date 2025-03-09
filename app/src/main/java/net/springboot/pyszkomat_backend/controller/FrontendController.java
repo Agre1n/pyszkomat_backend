@@ -9,11 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/frontend")
 public class FrontendController {
@@ -32,8 +30,7 @@ public class FrontendController {
             OrderItemService orderItemService,
             OrderService orderService,
             ParcelMachineService parcelMachineService,
-            RestaurantService restaurantService
-    ) {
+            RestaurantService restaurantService) {
         this.customerService = customerService;
         this.menuItemService = menuItemService;
         this.orderItemService = orderItemService;
@@ -108,7 +105,7 @@ public class FrontendController {
         return ResponseEntity.ok(new OrderCrudDto(newOrder));
     }
 
-    @GetMapping("/customers/orders/{customerId}")
+    @GetMapping("/customers/orders/active/{customerId}")
     public ResponseEntity<List<OrderFrontendDto>> getCustomerActiveOrders(@PathVariable Long customerId) {
         List<OrderFrontendDto> orders = new ArrayList<>();
 
@@ -122,6 +119,106 @@ public class FrontendController {
         }
 
         return ResponseEntity.ok(orders);
+    }
+
+    @GetMapping("/customers/orders/history/{customerId}")
+    public ResponseEntity<List<OrderFrontendDto>> getCustomerOrdersHistory(@PathVariable Long customerId) {
+        List<OrderFrontendDto> orders = new ArrayList<>();
+
+        for (Order order : customerService.getCustomer(customerId).orders) {
+            if (order.status == OrderStatus.RECEIVED)
+                orders.add(new OrderFrontendDto(order));
+        }
+
+        return ResponseEntity.ok(orders);
+    }
+
+    @GetMapping("/favourite/restaurants/{customerId}")
+    public ResponseEntity<List<RestaurantFrontendDto>> getFavRestaurants(@PathVariable Long customerId) {
+        List<RestaurantFrontendDto> favRestaurants = new ArrayList<>();
+
+        for (Restaurant favRestaurant : customerService.getCustomer(customerId).favoriteRestaurants) {
+            favRestaurants.add(new RestaurantFrontendDto(favRestaurant));
+        }
+
+        return ResponseEntity.ok(favRestaurants);
+    }
+
+    @PostMapping("/favourite/restaurants/{customerId}/{restaurantId}")
+    public ResponseEntity<?> addFavRestaurant(
+            @PathVariable Long customerId,
+            @PathVariable Long restaurantId
+    ) {
+        Customer customer = customerService.getCustomer(customerId);
+        Restaurant restaurant = restaurantService.getRestaurant(restaurantId);
+
+        if (customer.favoriteRestaurants.contains(restaurant))
+            return ResponseEntity.status(400).body("Restaurant already in favorites");
+
+        customer.favoriteRestaurants.add(restaurant);
+        customerService.updateCustomer(customerId, customer);
+
+        return ResponseEntity.status(200).body("Restaurant added to favorites");
+    }
+
+    @DeleteMapping("/favourite/restaurants/{customerId}/{restaurantId}")
+    public ResponseEntity<Map<String, Boolean>> removeFavRestaurant(
+            @PathVariable Long customerId,
+            @PathVariable Long restaurantId
+    ) {
+        Customer customer = customerService.getCustomer(customerId);
+        Restaurant restaurant = restaurantService.getRestaurant(restaurantId);
+
+        customer.favoriteRestaurants.remove(restaurant);
+        customerService.updateCustomer(customerId, customer);
+
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("deleted", Boolean.TRUE);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/favourite/parcel_machines/{customerId}")
+    public ResponseEntity<List<ParcelMachineFrontendDto>> getFavParcelMachines(@PathVariable Long customerId) {
+        List<ParcelMachineFrontendDto> favParcelMachines = new ArrayList<>();
+
+        for (ParcelMachine favParcelMachine : customerService.getCustomer(customerId).favoriteParcelMachines) {
+            favParcelMachines.add(new ParcelMachineFrontendDto(favParcelMachine));
+        }
+
+        return ResponseEntity.ok(favParcelMachines);
+    }
+
+    @PostMapping("/favourite/parcel_machines/{customerId}/{parcelMachineId}")
+    public ResponseEntity<?> addFavParcelMachine(
+            @PathVariable Long customerId,
+            @PathVariable String parcelMachineId
+    ) {
+        Customer customer = customerService.getCustomer(customerId);
+        ParcelMachine parcelMachine = parcelMachineService.getParcelMachine(parcelMachineId);
+
+        if (customer.favoriteParcelMachines.contains(parcelMachine))
+            return ResponseEntity.status(400).body("Parcel machine already in favorites");
+
+        customer.favoriteParcelMachines.add(parcelMachine);
+        customerService.updateCustomer(customerId, customer);
+
+        return ResponseEntity.status(200).body("Parcel machine added to favorites");
+    }
+
+    @DeleteMapping("/favourite/parcel_machines/{customerId}/{parcelMachineId}")
+    public ResponseEntity<Map<String, Boolean>> removeFavParcelMachine(
+            @PathVariable Long customerId,
+            @PathVariable String parcelMachineId
+    ) {
+        Customer customer = customerService.getCustomer(customerId);
+        ParcelMachine parcelMachine = parcelMachineService.getParcelMachine(parcelMachineId);
+
+        customer.favoriteParcelMachines.remove(parcelMachine);
+        customerService.updateCustomer(customerId, customer);
+
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("deleted", Boolean.TRUE);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/orders/{orderId}")

@@ -712,7 +712,9 @@ public class DatabaseInitializer implements CommandLineRunner {
                 "anna.kowalska@example.com",
                 "555-123-456",
                 "Rynek 23, 50-101 Wrocław",
-                null
+                null,
+                List.of(restaurant3, restaurant4),
+                List.of(parcelMachines.get(4), parcelMachines.get(0))
         );
         Customer customer2 = new Customer(
                 null,
@@ -721,7 +723,9 @@ public class DatabaseInitializer implements CommandLineRunner {
                 "jan.nowak@example.com",
                 "321-654-987",
                 "ul. Kazimierza Wielkiego 54, 50-077 Wrocław",
-                null
+                null,
+                List.of(restaurant5, restaurant8, restaurant9),
+                List.of(parcelMachines.get(2), parcelMachines.get(3))
         );
         customerService.addCustomer(customer1);
         customerService.addCustomer(customer2);
@@ -749,8 +753,44 @@ public class DatabaseInitializer implements CommandLineRunner {
                 parcelMachines.get(2).lockers.getFirst(),
                 null
         );
+        Order order3 = new Order(
+                null,
+                LocalDateTime.now().plusMinutes(-60),
+                LocalDateTime.now().plusMinutes(random.nextInt(30) - 60),
+                LocalDateTime.now().plusMinutes(random.nextInt(30) - 120),
+                OrderStatus.RECEIVED,
+                false,
+                customer1,
+                parcelMachines.get(1).lockers.getFirst(),
+                null
+        );
+        Order order4 = new Order(
+                null,
+                LocalDateTime.now().plusMinutes(-60),
+                LocalDateTime.now().plusMinutes(random.nextInt(30) - 60),
+                LocalDateTime.now().plusMinutes(random.nextInt(30) - 120),
+                OrderStatus.RECEIVED,
+                false,
+                customer1,
+                parcelMachines.get(2).lockers.getFirst(),
+                null
+        );
+        Order order5 = new Order(
+                null,
+                LocalDateTime.now().plusMinutes(-60),
+                LocalDateTime.now().plusMinutes(random.nextInt(30) - 60),
+                LocalDateTime.now().plusMinutes(random.nextInt(30) - 120),
+                OrderStatus.RECEIVED,
+                false,
+                customer1,
+                parcelMachines.get(3).lockers.getFirst(),
+                null
+        );
         orderService.addOrder(order1);
         orderService.addOrder(order2);
+        orderService.addOrder(order3);
+        orderService.addOrder(order4);
+        orderService.addOrder(order5);
 
         List<OrderItem> orderItems = List.of(
                 new OrderItem(null, 2, restaurant1.menuItems.get(0), order1),
@@ -759,7 +799,16 @@ public class DatabaseInitializer implements CommandLineRunner {
                 new OrderItem(null, 1, restaurant10.menuItems.get(0), order2),
                 new OrderItem(null, 1, restaurant10.menuItems.get(2), order2),
                 new OrderItem(null, 2, restaurant10.menuItems.get(4), order2),
-                new OrderItem(null, 3, restaurant10.menuItems.get(1), order2)
+                new OrderItem(null, 3, restaurant10.menuItems.get(1), order2),
+                new OrderItem(null, 2, restaurant2.menuItems.get(0), order3),
+                new OrderItem(null, 1, restaurant2.menuItems.get(3), order3),
+                new OrderItem(null, 3, restaurant2.menuItems.get(1), order3),
+                new OrderItem(null, 2, restaurant3.menuItems.get(0), order4),
+                new OrderItem(null, 1, restaurant3.menuItems.get(3), order4),
+                new OrderItem(null, 3, restaurant3.menuItems.get(1), order4),
+                new OrderItem(null, 2, restaurant6.menuItems.get(0), order5),
+                new OrderItem(null, 1, restaurant6.menuItems.get(3), order5),
+                new OrderItem(null, 3, restaurant6.menuItems.get(1), order5)
         );
         orderItems.forEach(orderItemService::addOrderItem);
     }
